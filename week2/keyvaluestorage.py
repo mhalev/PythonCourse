@@ -22,7 +22,7 @@ def write_arguments(arguments, file):
     key_name, value_name = arguments
     if key_name != None and value_name != None:
         with open(file, 'a') as f:
-            json.dump(arguments,f)
+            json.dump([arguments],f)
         return print('В файл добавлены значения key: {} и value: {}'.format(key_name, value_name))
     else:
         return print('Считываем значения...')
@@ -34,9 +34,9 @@ def read_values(arguments, file):
         with open(file, 'r') as f:
             values = json.load(f)
             values.get(key_name, list())
-        return print('В файл добавлены значения key: {} и value: {}'.format(key_name, value_name))
+        return print(values)
     else:
-        return print('Значения с ')
+        return None
 
 arguments = get_arguments()
 storage_path = os.path.join(tempfile.gettempdir(), 'storage.data')
