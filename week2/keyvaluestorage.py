@@ -10,36 +10,40 @@ def get_arguments():
     arguments = parser.parse_args()
     return arguments.key, arguments.value
 
-def create_storage(file):
+def init_storage(file):
+    with open(file, 'a+') as f:
+        f.close()
+
+def get_dict_from_storage(file):
     try:
         with open(file, 'r') as f:
-            f.close()
+            dic = json.load(f)
     except:
-        with open(file, 'w') as f:
-            print('Создан файл-хранилище')
+        dic = dict()
+    return dic
 
-def write_arguments(arguments, file):
-    key_name, value_name = arguments
-    if key_name != None and value_name != None:
-        with open(file, 'a') as f:
-            json.dump([arguments],f)
-        return print('В файл добавлены значения key: {} и value: {}'.format(key_name, value_name))
-    else:
-        return print('Считываем значения...')
+def add_to_storage(key_name, value_name, file):
+    dict = get_dict_from_storage(file)
+    dict.setdefault(key_name, list()).append(value_name)
+    save_to_storage(dict, file)
+    return True
 
-def read_values(arguments, file):
-    key_name, value_name = arguments
-    print(key_name, value_name)
-    if key_name != None and value_name == None:
-        with open(file, 'r') as f:
-            values = json.load(f)
-            values.get(key_name, list())
-        return print(values)
-    else:
-        return None
+def save_to_storage(dict, file):
+    with open(file, 'w') as f:
+        json.dump(dict, f)
+    return True
+
+def load_from_storage(key_name, file):
+    dict = get_dict_from_storage(file)
+    return dict.get(key_name, list())
 
 arguments = get_arguments()
+key_name, value_name = arguments
 storage_path = os.path.join(tempfile.gettempdir(), 'storage.data')
-create_storage(storage_path)
-write_arguments(arguments, storage_path)
-read_values(arguments, storage_path)
+init_storage(storage_path)
+if value_name != None:
+    add_to_storage(key_name, value_name, storage_path)
+elif key_name != None:
+    print('Для ключа {} хранятся следующие значения: {}'.format(key_name, load_from_storage(key_name, storage_path)))
+else:
+    print('Значения для ключа {} не найдены или не задан ключ'.format(key_name))
